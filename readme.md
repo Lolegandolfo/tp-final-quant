@@ -38,7 +38,7 @@ Resultados principales:
 
 Conclusión: en el Merval, HPCA no es más preciso que PCA, pero es igual de explicativo, mucho más interpretable y genera carteras con menos rotación.
 
-### Idea 2: otro mercado desarrollado (pendiente)
+### Idea 2: otro mercado desarrollado (revisión)
 
 Repetir el análisis en un mercado más grande y con sectores más diversificados, por ejemplo:
 
@@ -55,6 +55,24 @@ Para adaptar el script alcanza con cambiar:
 - los tickers y la partición sectorial (por ejemplo, sectores GICS o ICB);
 - la moneda: usar retornos en moneda local o en USD, y eliminar el cálculo del CCL;
 - el filtro de liquidez, si hiciera falta.
+
+#### Mercado de Japón: Nikkei 255
+
+Aplicamos el HPCA a las 225 acciones del índice Nikkei 225 (217 tras el filtro de liquidez), agrupadas en 25 sectores a partir de la industria propia de Nikkei. Usamos retornos diarios en JPY entre 2018 y 2026, sin ajuste cambiario porque Japón no tiene control de cambios. Todo está en `HPCA_Nikkei.py` y los gráficos quedan en `figuras/nikkei/`.
+
+Resultados principales:
+
+- **El primer factor es el mercado, y HPCA explica casi lo mismo que PCA.**
+  - EV1 explica 36,3% de la varianza con PCA y 36,0% con HPCA, con una similitud coseno de 0,995. Queda entre el 30% del S&P 500 del paper y el 60,9% del Merval: Japón es un mercado grande y diversificado, pero sigue siendo un único país.
+  - Las correlaciones entre sectores van de 0,30 a 0,88 (promedio 0,58), bastante más dispersas que en el Merval (0,72–0,87). Marítimo es el sector menos correlacionado con el resto (el transporte naval depende más del ciclo de comercio global que del mercado japonés), mientras que el cluster industrial-exportador (Maquinaria Eléctrica, Materiales, Maquinaria Industrial, Vidrio y Cerámica) es el más correlacionado entre sí.
+- **Los factores HPCA se pueden interpretar.** El EV2 es Alimentos y Ferrocarriles contra Maquinaria Eléctrica; el EV3 es Banca contra Maquinaria Eléctrica y Tecnología; el EV4 es un corto puro en Tecnología, Banca y Seguros. Los autovectores de PCA vuelven a mezclar sectores sin una lógica clara.
+- **Con 217 acciones, el análisis se acerca mucho más a las condiciones del paper que el Merval.** Hay 11 autovalores por encima de la cota de Marchenko-Pastur (λ+ = 1,74) en la muestra completa, contra 1 solo en el Merval. Al remover los 25 factores sectoriales, los residuos de PCA y HPCA quedan prácticamente iguales (27 autovalores por encima de la cota en ambos casos): la matriz completa no aporta más información que el HPCA, igual que en el paper.
+- **Estabilidad en el tiempo: resultado más parejo que en el Merval.** A nivel de autovector individual, PCA y HPCA quedan muy parecidos (por ejemplo EV3: 0,945 PCA vs 0,956 HPCA; EV4: 0,917 vs 0,907), sin una ventaja sistemática de uno sobre otro. A nivel de subespacio, menos sensible a cambios de orden entre autovalores cercanos, HPCA es levemente más estable (top-3: 0,984 contra 0,972; top-5: 0,956 contra 0,948).
+- **Cartera de mínima varianza *out-of-sample*: acá sí hay una ventaja clara de HPCA.** Logra el mejor retorno ajustado por riesgo (Ret/Vol 0,545, contra 0,398 de PCA y 0,520 de Ledoit-Wolf) con una rotación mensual muy inferior a ambos (0,74 contra 1,43 de PCA y 2,88 de Ledoit-Wolf). La matriz muestral sin estructura es inusable en la práctica: necesita 14,9 de rotación mensual y un apalancamiento bruto de 16,6 para lograr, de todos modos, una volatilidad mucho más alta (28,6% anual).
+- **Robustez JPY vs USD: la varianza explicada no cambia, pero el signo de la relación con el tipo de cambio sí.** El EV1 explica prácticamente lo mismo en yenes que en dólares (36,0% vs 35,9% con HPCA), pero su correlación con el USD/JPY cambia de signo: +0,23 en yenes (las acciones japonesas suben cuando el yen se devalúa, el clásico efecto exportador) y −0,21 en dólares (ese mismo movimiento, traducido a dólares, se revierte). Confirma que medir en yenes aísla mejor la estructura accionaria del ruido cambiario.
+- **Robustez sectorial: 25 sectores (industria Nikkei) vs 17 sectores (JPX oficial) dan prácticamente el mismo resultado.** EV1 HPCA explica 36,0% con la partición propia y 35,9% con la oficial de JPX; el error de aproximación fuera de bloque es 0,056 y 0,060 respectivamente. El resultado no depende de qué tan fina sea la clasificación sectorial, siempre que sea económicamente razonable.
+
+Conclusión: a diferencia del Merval, en el Nikkei 225 HPCA no sólo es igual de explicativo e interpretable, sino que además arma carteras de mínima varianza con mejor retorno ajustado por riesgo y mucha menos rotación, probablemente porque con 217 acciones y 25 sectores hay bastante más margen real para que la estructura jerárquica le gane al ruido estadístico.
 
 ## Objetivo
 
